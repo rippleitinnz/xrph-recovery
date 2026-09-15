@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XRPH Wallet Recovery</title>
+<script>
+(()=>{function rn(t){return t instanceof Uint8Array||t!=null&&typeof t=="object"&&t.constructor.name==="Uint8Array"}function sn(t,...e){if(!rn(t))throw new Error("Expected Uint8Array");if(e.length>0&&!e.includes(t.length))throw new Error(`Expected Uint8Array of length ${e}, not of length=${t.length}`)}function Rt(t,e=!0){if(t.destroyed)throw new Error("Hash instance has been destroyed");if(e&&t.finished)throw new Error("Hash#digest() has already been called")}function xe(t,e){sn(t);let n=e.outputLen;if(t.length<n)throw new Error(`digestInto() expects output buffer of length at least ${n}`)}var Et=typeof globalThis=="object"&&"crypto"in globalThis?globalThis.crypto:void 0;function be(t){return t instanceof Uint8Array||t!=null&&typeof t=="object"&&t.constructor.name==="Uint8Array"}var _t=t=>new DataView(t.buffer,t.byteOffset,t.byteLength);var cn=new Uint8Array(new Uint32Array([287454020]).buffer)[0]===68;if(!cn)throw new Error("Non little-endian hardware is not supported");function qt(t){if(typeof t!="string")throw new Error(`utf8ToBytes expected string, got ${typeof t}`);return new Uint8Array(new TextEncoder().encode(t))}function Ft(t){if(typeof t=="string"&&(t=qt(t)),!be(t))throw new Error(`expected Uint8Array, got ${typeof t}`);return t}function pe(...t){let e=0;for(let o=0;o<t.length;o++){let r=t[o];if(!be(r))throw new Error("Uint8Array expected");e+=r.length}let n=new Uint8Array(e);for(let o=0,r=0;o<t.length;o++){let s=t[o];n.set(s,r),r+=s.length}return n}var At=class{clone(){return this._cloneInto()}},Xo={}.toString;function ge(t){let e=o=>t().update(Ft(o)).digest(),n=t();return e.outputLen=n.outputLen,e.blockLen=n.blockLen,e.create=()=>t(),e}function we(t=32){if(Et&&typeof Et.getRandomValues=="function")return Et.getRandomValues(new Uint8Array(t));throw new Error("crypto.getRandomValues must be defined")}function fn(t,e,n,o){if(typeof t.setBigUint64=="function")return t.setBigUint64(e,n,o);let r=BigInt(32),s=BigInt(4294967295),c=Number(n>>r&s),f=Number(n&s),i=o?4:0,h=o?0:4;t.setUint32(e+i,c,o),t.setUint32(e+h,f,o)}var Lt=class extends At{constructor(e,n,o,r){super(),this.blockLen=e,this.outputLen=n,this.padOffset=o,this.isLE=r,this.finished=!1,this.length=0,this.pos=0,this.destroyed=!1,this.buffer=new Uint8Array(e),this.view=_t(this.buffer)}update(e){Rt(this);let{view:n,buffer:o,blockLen:r}=this;e=Ft(e);let s=e.length;for(let c=0;c<s;){let f=Math.min(r-this.pos,s-c);if(f===r){let i=_t(e);for(;r<=s-c;c+=r)this.process(i,c);continue}o.set(e.subarray(c,c+f),this.pos),this.pos+=f,c+=f,this.pos===r&&(this.process(n,0),this.pos=0)}return this.length+=e.length,this.roundClean(),this}digestInto(e){Rt(this),xe(e,this),this.finished=!0;let{buffer:n,view:o,blockLen:r,isLE:s}=this,{pos:c}=this;n[c++]=128,this.buffer.subarray(c).fill(0),this.padOffset>r-c&&(this.process(o,0),c=0);for(let l=c;l<r;l++)n[l]=0;fn(o,r-8,BigInt(this.length*8),s),this.process(o,0);let f=_t(e),i=this.outputLen;if(i%4)throw new Error("_sha2: outputLen should be aligned to 32bit");let h=i/4,a=this.get();if(h>a.length)throw new Error("_sha2: outputLen bigger than state");for(let l=0;l<h;l++)f.setUint32(4*l,a[l],s)}digest(){let{buffer:e,outputLen:n}=this;this.digestInto(e);let o=e.slice(0,n);return this.destroy(),o}_cloneInto(e){e||(e=new this.constructor),e.set(...this.get());let{blockLen:n,buffer:o,length:r,finished:s,destroyed:c,pos:f}=this;return e.length=r,e.pos=f,e.finished=s,e.destroyed=c,r%n&&e.buffer.set(o),e}};var St=BigInt(4294967295),Gt=BigInt(32);function ye(t,e=!1){return e?{h:Number(t&St),l:Number(t>>Gt&St)}:{h:Number(t>>Gt&St)|0,l:Number(t&St)|0}}function an(t,e=!1){let n=new Uint32Array(t.length),o=new Uint32Array(t.length);for(let r=0;r<t.length;r++){let{h:s,l:c}=ye(t[r],e);[n[r],o[r]]=[s,c]}return[n,o]}var hn=(t,e)=>BigInt(t>>>0)<<Gt|BigInt(e>>>0),ln=(t,e,n)=>t>>>n,dn=(t,e,n)=>t<<32-n|e>>>n,un=(t,e,n)=>t>>>n|e<<32-n,xn=(t,e,n)=>t<<32-n|e>>>n,bn=(t,e,n)=>t<<64-n|e>>>n-32,pn=(t,e,n)=>t>>>n-32|e<<64-n,gn=(t,e)=>e,wn=(t,e)=>t,yn=(t,e,n)=>t<<n|e>>>32-n,mn=(t,e,n)=>e<<n|t>>>32-n,Bn=(t,e,n)=>e<<n-32|t>>>64-n,En=(t,e,n)=>t<<n-32|e>>>64-n;function An(t,e,n,o){let r=(e>>>0)+(o>>>0);return{h:t+n+(r/2**32|0)|0,l:r|0}}var _n=(t,e,n)=>(t>>>0)+(e>>>0)+(n>>>0),Ln=(t,e,n,o)=>e+n+o+(t/2**32|0)|0,Sn=(t,e,n,o)=>(t>>>0)+(e>>>0)+(n>>>0)+(o>>>0),Hn=(t,e,n,o,r)=>e+n+o+r+(t/2**32|0)|0,In=(t,e,n,o,r)=>(t>>>0)+(e>>>0)+(n>>>0)+(o>>>0)+(r>>>0),Un=(t,e,n,o,r,s)=>e+n+o+r+s+(t/2**32|0)|0;var vn={fromBig:ye,split:an,toBig:hn,shrSH:ln,shrSL:dn,rotrSH:un,rotrSL:xn,rotrBH:bn,rotrBL:pn,rotr32H:gn,rotr32L:wn,rotlSH:yn,rotlSL:mn,rotlBH:Bn,rotlBL:En,add:An,add3L:_n,add3H:Ln,add4L:Sn,add4H:Hn,add5H:Un,add5L:In},y=vn;var[Cn,Tn]=y.split(["0x428a2f98d728ae22","0x7137449123ef65cd","0xb5c0fbcfec4d3b2f","0xe9b5dba58189dbbc","0x3956c25bf348b538","0x59f111f1b605d019","0x923f82a4af194f9b","0xab1c5ed5da6d8118","0xd807aa98a3030242","0x12835b0145706fbe","0x243185be4ee4b28c","0x550c7dc3d5ffb4e2","0x72be5d74f27b896f","0x80deb1fe3b1696b1","0x9bdc06a725c71235","0xc19bf174cf692694","0xe49b69c19ef14ad2","0xefbe4786384f25e3","0x0fc19dc68b8cd5b5","0x240ca1cc77ac9c65","0x2de92c6f592b0275","0x4a7484aa6ea6e483","0x5cb0a9dcbd41fbd4","0x76f988da831153b5","0x983e5152ee66dfab","0xa831c66d2db43210","0xb00327c898fb213f","0xbf597fc7beef0ee4","0xc6e00bf33da88fc2","0xd5a79147930aa725","0x06ca6351e003826f","0x142929670a0e6e70","0x27b70a8546d22ffc","0x2e1b21385c26c926","0x4d2c6dfc5ac42aed","0x53380d139d95b3df","0x650a73548baf63de","0x766a0abb3c77b2a8","0x81c2c92e47edaee6","0x92722c851482353b","0xa2bfe8a14cf10364","0xa81a664bbc423001","0xc24b8b70d0f89791","0xc76c51a30654be30","0xd192e819d6ef5218","0xd69906245565a910","0xf40e35855771202a","0x106aa07032bbd1b8","0x19a4c116b8d2d0c8","0x1e376c085141ab53","0x2748774cdf8eeb99","0x34b0bcb5e19b48a8","0x391c0cb3c5c95a63","0x4ed8aa4ae3418acb","0x5b9cca4f7763e373","0x682e6ff3d6b2b8a3","0x748f82ee5defb2fc","0x78a5636f43172f60","0x84c87814a1f0ab72","0x8cc702081a6439ec","0x90befffa23631e28","0xa4506cebde82bde9","0xbef9a3f7b2c67915","0xc67178f2e372532b","0xca273eceea26619c","0xd186b8c721c0c207","0xeada7dd6cde0eb1e","0xf57d4f7fee6ed178","0x06f067aa72176fba","0x0a637dc5a2c898a6","0x113f9804bef90dae","0x1b710b35131c471b","0x28db77f523047d84","0x32caab7b40c72493","0x3c9ebe0a15c9bebc","0x431d67c49c100d4c","0x4cc5d4becb3e42b6","0x597f299cfc657e2a","0x5fcb6fab3ad6faec","0x6c44198c4a475817"].map(t=>BigInt(t))),rt=new Uint32Array(80),st=new Uint32Array(80),Mt=class extends Lt{constructor(){super(128,64,16,!1),this.Ah=1779033703,this.Al=-205731576,this.Bh=-1150833019,this.Bl=-2067093701,this.Ch=1013904242,this.Cl=-23791573,this.Dh=-1521486534,this.Dl=1595750129,this.Eh=1359893119,this.El=-1377402159,this.Fh=-1694144372,this.Fl=725511199,this.Gh=528734635,this.Gl=-79577749,this.Hh=1541459225,this.Hl=327033209}get(){let{Ah:e,Al:n,Bh:o,Bl:r,Ch:s,Cl:c,Dh:f,Dl:i,Eh:h,El:a,Fh:l,Fl:u,Gh:b,Gl:E,Hh:A,Hl:_}=this;return[e,n,o,r,s,c,f,i,h,a,l,u,b,E,A,_]}set(e,n,o,r,s,c,f,i,h,a,l,u,b,E,A,_){this.Ah=e|0,this.Al=n|0,this.Bh=o|0,this.Bl=r|0,this.Ch=s|0,this.Cl=c|0,this.Dh=f|0,this.Dl=i|0,this.Eh=h|0,this.El=a|0,this.Fh=l|0,this.Fl=u|0,this.Gh=b|0,this.Gl=E|0,this.Hh=A|0,this.Hl=_|0}process(e,n){for(let x=0;x<16;x++,n+=4)rt[x]=e.getUint32(n),st[x]=e.getUint32(n+=4);for(let x=16;x<80;x++){let U=rt[x-15]|0,p=st[x-15]|0,G=y.rotrSH(U,p,1)^y.rotrSH(U,p,8)^y.shrSH(U,p,7),K=y.rotrSL(U,p,1)^y.rotrSL(U,p,8)^y.shrSL(U,p,7),v=rt[x-2]|0,T=st[x-2]|0,Z=y.rotrSH(v,T,19)^y.rotrBH(v,T,61)^y.shrSH(v,T,6),j=y.rotrSL(v,T,19)^y.rotrBL(v,T,61)^y.shrSL(v,T,6),W=y.add4L(K,j,st[x-7],st[x-16]),X=y.add4H(W,G,Z,rt[x-7],rt[x-16]);rt[x]=X|0,st[x]=W|0}let{Ah:o,Al:r,Bh:s,Bl:c,Ch:f,Cl:i,Dh:h,Dl:a,Eh:l,El:u,Fh:b,Fl:E,Gh:A,Gl:_,Hh:R,Hl:F}=this;for(let x=0;x<80;x++){let U=y.rotrSH(l,u,14)^y.rotrSH(l,u,18)^y.rotrBH(l,u,41),p=y.rotrSL(l,u,14)^y.rotrSL(l,u,18)^y.rotrBL(l,u,41),G=l&b^~l&A,K=u&E^~u&_,v=y.add5L(F,p,K,Tn[x],st[x]),T=y.add5H(v,R,U,G,Cn[x],rt[x]),Z=v|0,j=y.rotrSH(o,r,28)^y.rotrBH(o,r,34)^y.rotrBH(o,r,39),W=y.rotrSL(o,r,28)^y.rotrBL(o,r,34)^y.rotrBL(o,r,39),X=o&s^o&f^s&f,pt=r&c^r&i^c&i;R=A|0,F=_|0,A=b|0,_=E|0,b=l|0,E=u|0,{h:l,l:u}=y.add(h|0,a|0,T|0,Z|0),h=f|0,a=i|0,f=s|0,i=c|0,s=o|0,c=r|0;let lt=y.add3L(Z,W,pt);o=y.add3H(lt,T,j,X),r=lt|0}({h:o,l:r}=y.add(this.Ah|0,this.Al|0,o|0,r|0)),{h:s,l:c}=y.add(this.Bh|0,this.Bl|0,s|0,c|0),{h:f,l:i}=y.add(this.Ch|0,this.Cl|0,f|0,i|0),{h,l:a}=y.add(this.Dh|0,this.Dl|0,h|0,a|0),{h:l,l:u}=y.add(this.Eh|0,this.El|0,l|0,u|0),{h:b,l:E}=y.add(this.Fh|0,this.Fl|0,b|0,E|0),{h:A,l:_}=y.add(this.Gh|0,this.Gl|0,A|0,_|0),{h:R,l:F}=y.add(this.Hh|0,this.Hl|0,R|0,F|0),this.set(o,r,s,c,f,i,h,a,l,u,b,E,A,_,R,F)}roundClean(){rt.fill(0),st.fill(0)}destroy(){this.buffer.fill(0),this.set(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)}};var Vt=ge(()=>new Mt);var or=BigInt(0),Nn=BigInt(1),On=BigInt(2);function gt(t){return t instanceof Uint8Array||t!=null&&typeof t=="object"&&t.constructor.name==="Uint8Array"}var Dn=Array.from({length:256},(t,e)=>e.toString(16).padStart(2,"0"));function Ht(t){if(!gt(t))throw new Error("Uint8Array expected");let e="";for(let n=0;n<t.length;n++)e+=Dn[t[n]];return e}function Be(t){if(typeof t!="string")throw new Error("hex string expected, got "+typeof t);return BigInt(t===""?"0":`0x${t}`)}var et={_0:48,_9:57,_A:65,_F:70,_a:97,_f:102};function me(t){if(t>=et._0&&t<=et._9)return t-et._0;if(t>=et._A&&t<=et._F)return t-(et._A-10);if(t>=et._a&&t<=et._f)return t-(et._a-10)}function Ee(t){if(typeof t!="string")throw new Error("hex string expected, got "+typeof t);let e=t.length,n=e/2;if(e%2)throw new Error("padded hex string expected, got unpadded hex of length "+e);let o=new Uint8Array(n);for(let r=0,s=0;r<n;r++,s+=2){let c=me(t.charCodeAt(s)),f=me(t.charCodeAt(s+1));if(c===void 0||f===void 0){let i=t[s]+t[s+1];throw new Error('hex string expected, got non-hex character "'+i+'" at index '+s)}o[r]=c*16+f}return o}function Ae(t){return Be(Ht(t))}function ut(t){if(!gt(t))throw new Error("Uint8Array expected");return Be(Ht(Uint8Array.from(t).reverse()))}function $t(t,e){return Ee(t.toString(16).padStart(e*2,"0"))}function wt(t,e){return $t(t,e).reverse()}function J(t,e,n){let o;if(typeof e=="string")try{o=Ee(e)}catch(s){throw new Error(`${t} must be valid hex string, got "${e}". Cause: ${s}`)}else if(gt(e))o=Uint8Array.from(e);else throw new Error(`${t} must be hex string or Uint8Array`);let r=o.length;if(typeof n=="number"&&r!==n)throw new Error(`${t} expected ${n} bytes, got ${r}`);return o}function kt(...t){let e=0;for(let r=0;r<t.length;r++){let s=t[r];if(!gt(s))throw new Error("Uint8Array expected");e+=s.length}let n=new Uint8Array(e),o=0;for(let r=0;r<t.length;r++){let s=t[r];n.set(s,o),o+=s.length}return n}var _e=t=>(On<<BigInt(t-1))-Nn;var Rn={bigint:t=>typeof t=="bigint",function:t=>typeof t=="function",boolean:t=>typeof t=="boolean",string:t=>typeof t=="string",stringOrUint8Array:t=>typeof t=="string"||gt(t),isSafeInteger:t=>Number.isSafeInteger(t),array:t=>Array.isArray(t),field:(t,e)=>e.Fp.isValid(t),hash:t=>typeof t=="function"&&Number.isSafeInteger(t.outputLen)};function xt(t,e,n={}){let o=(r,s,c)=>{let f=Rn[s];if(typeof f!="function")throw new Error(`Invalid validator "${s}", expected function`);let i=t[r];if(!(c&&i===void 0)&&!f(i,t))throw new Error(`Invalid param ${String(r)}=${i} (${typeof i}), expected ${s}`)};for(let[r,s]of Object.entries(e))o(r,s,!1);for(let[r,s]of Object.entries(n))o(r,s,!0);return t}var q=BigInt(0),O=BigInt(1),dt=BigInt(2),Fn=BigInt(3),Zt=BigInt(4),Le=BigInt(5),Se=BigInt(8),Gn=BigInt(9),Mn=BigInt(16);function D(t,e){let n=t%e;return n>=q?n:e+n}function Vn(t,e,n){if(n<=q||e<q)throw new Error("Expected power/modulo > 0");if(n===O)return q;let o=O;for(;e>q;)e&O&&(o=o*t%n),t=t*t%n,e>>=O;return o}function Y(t,e,n){let o=t;for(;e-- >q;)o*=o,o%=n;return o}function He(t,e){if(t===q||e<=q)throw new Error(`invert: expected positive integers, got n=${t} mod=${e}`);let n=D(t,e),o=e,r=q,s=O,c=O,f=q;for(;n!==q;){let h=o/n,a=o%n,l=r-c*h,u=s-f*h;o=n,n=a,r=c,s=f,c=l,f=u}if(o!==O)throw new Error("invert: does not exist");return D(r,e)}function $n(t){let e=(t-O)/dt,n,o,r;for(n=t-O,o=0;n%dt===q;n/=dt,o++);for(r=dt;r<t&&Vn(r,e,t)!==t-O;r++);if(o===1){let c=(t+O)/Zt;return function(i,h){let a=i.pow(h,c);if(!i.eql(i.sqr(a),h))throw new Error("Cannot find square root");return a}}let s=(n+O)/dt;return function(f,i){if(f.pow(i,e)===f.neg(f.ONE))throw new Error("Cannot find square root");let h=o,a=f.pow(f.mul(f.ONE,r),n),l=f.pow(i,s),u=f.pow(i,n);for(;!f.eql(u,f.ONE);){if(f.eql(u,f.ZERO))return f.ZERO;let b=1;for(let A=f.sqr(u);b<h&&!f.eql(A,f.ONE);b++)A=f.sqr(A);let E=f.pow(a,O<<BigInt(h-b-1));a=f.sqr(E),l=f.mul(l,E),u=f.mul(u,a),h=b}return l}}function kn(t){if(t%Zt===Fn){let e=(t+O)/Zt;return function(o,r){let s=o.pow(r,e);if(!o.eql(o.sqr(s),r))throw new Error("Cannot find square root");return s}}if(t%Se===Le){let e=(t-Le)/Se;return function(o,r){let s=o.mul(r,dt),c=o.pow(s,e),f=o.mul(r,c),i=o.mul(o.mul(f,dt),c),h=o.mul(f,o.sub(i,o.ONE));if(!o.eql(o.sqr(h),r))throw new Error("Cannot find square root");return h}}return t%Mn,$n(t)}var Ie=(t,e)=>(D(t,e)&O)===O,Zn=["create","isValid","is0","neg","inv","sqrt","sqr","eql","add","sub","mul","pow","div","addN","subN","mulN","sqrN"];function Ue(t){let e={ORDER:"bigint",MASK:"bigint",BYTES:"isSafeInteger",BITS:"isSafeInteger"},n=Zn.reduce((o,r)=>(o[r]="function",o),e);return xt(t,n)}function jn(t,e,n){if(n<q)throw new Error("Expected power > 0");if(n===q)return t.ONE;if(n===O)return e;let o=t.ONE,r=e;for(;n>q;)n&O&&(o=t.mul(o,r)),r=t.sqr(r),n>>=O;return o}function Wn(t,e){let n=new Array(e.length),o=e.reduce((s,c,f)=>t.is0(c)?s:(n[f]=s,t.mul(s,c)),t.ONE),r=t.inv(o);return e.reduceRight((s,c,f)=>t.is0(c)?s:(n[f]=t.mul(s,n[f]),t.mul(s,c)),r),n}function jt(t,e){let n=e!==void 0?e:t.toString(2).length,o=Math.ceil(n/8);return{nBitLength:n,nByteLength:o}}function ve(t,e,n=!1,o={}){if(t<=q)throw new Error(`Expected Field ORDER > 0, got ${t}`);let{nBitLength:r,nByteLength:s}=jt(t,e);if(s>2048)throw new Error("Field lengths over 2048 bytes are not supported");let c=kn(t),f=Object.freeze({ORDER:t,BITS:r,BYTES:s,MASK:_e(r),ZERO:q,ONE:O,create:i=>D(i,t),isValid:i=>{if(typeof i!="bigint")throw new Error(`Invalid field element: expected bigint, got ${typeof i}`);return q<=i&&i<t},is0:i=>i===q,isOdd:i=>(i&O)===O,neg:i=>D(-i,t),eql:(i,h)=>i===h,sqr:i=>D(i*i,t),add:(i,h)=>D(i+h,t),sub:(i,h)=>D(i-h,t),mul:(i,h)=>D(i*h,t),pow:(i,h)=>jn(f,i,h),div:(i,h)=>D(i*He(h,t),t),sqrN:i=>i*i,addN:(i,h)=>i+h,subN:(i,h)=>i-h,mulN:(i,h)=>i*h,inv:i=>He(i,t),sqrt:o.sqrt||(i=>c(f,i)),invertBatch:i=>Wn(f,i),cmov:(i,h,a)=>a?h:i,toBytes:i=>n?wt(i,s):$t(i,s),fromBytes:i=>{if(i.length!==s)throw new Error(`Fp.fromBytes: expected ${s}, got ${i.length}`);return n?ut(i):Ae(i)}});return Object.freeze(f)}function Ce(t,e){if(!t.isOdd)throw new Error("Field doesn't have isOdd");let n=t.sqrt(e);return t.isOdd(n)?t.neg(n):n}var Xn=BigInt(0),Wt=BigInt(1);function Te(t,e){let n=(r,s)=>{let c=s.negate();return r?c:s},o=r=>{let s=Math.ceil(e/r)+1,c=2**(r-1);return{windows:s,windowSize:c}};return{constTimeNegate:n,unsafeLadder(r,s){let c=t.ZERO,f=r;for(;s>Xn;)s&Wt&&(c=c.add(f)),f=f.double(),s>>=Wt;return c},precomputeWindow(r,s){let{windows:c,windowSize:f}=o(s),i=[],h=r,a=h;for(let l=0;l<c;l++){a=h,i.push(a);for(let u=1;u<f;u++)a=a.add(h),i.push(a);h=a.double()}return i},wNAF(r,s,c){let{windows:f,windowSize:i}=o(r),h=t.ZERO,a=t.BASE,l=BigInt(2**r-1),u=2**r,b=BigInt(r);for(let E=0;E<f;E++){let A=E*i,_=Number(c&l);c>>=b,_>i&&(_-=u,c+=Wt);let R=A,F=A+Math.abs(_)-1,x=E%2!==0,U=_<0;_===0?a=a.add(n(x,s[R])):h=h.add(n(U,s[F]))}return{p:h,f:a}},wNAFCached(r,s,c,f){let i=r._WINDOW_SIZE||1,h=s.get(r);return h||(h=this.precomputeWindow(r,i),i!==1&&s.set(r,f(h))),this.wNAF(i,h,c)}}}function Ne(t){return Ue(t.Fp),xt(t,{n:"bigint",h:"bigint",Gx:"field",Gy:"field"},{nBitLength:"isSafeInteger",nByteLength:"isSafeInteger"}),Object.freeze({...jt(t.n,t.nBitLength),...t,p:t.Fp.ORDER})}var P=BigInt(0),k=BigInt(1),It=BigInt(2),Yn=BigInt(8),Pn={zip215:!0};function zn(t){let e=Ne(t);return xt(t,{hash:"function",a:"bigint",d:"bigint",randomBytes:"function"},{adjustScalarBytes:"function",domain:"function",uvRatio:"function",mapToCurve:"function"}),Object.freeze({...e})}function Ut(t){let e=zn(t),{Fp:n,n:o,prehash:r,hash:s,randomBytes:c,nByteLength:f,h:i}=e,h=It<<BigInt(f*8)-k,a=n.create,l=e.uvRatio||((g,d)=>{try{return{isValid:!0,value:n.sqrt(g*n.inv(d))}}catch{return{isValid:!1,value:P}}}),u=e.adjustScalarBytes||(g=>g),b=e.domain||((g,d,w)=>{if(d.length||w)throw new Error("Contexts/pre-hash are not supported");return g}),E=g=>typeof g=="bigint"&&P<g,A=(g,d)=>E(g)&&E(d)&&g<d,_=g=>g===P||A(g,h);function R(g,d){if(A(g,d))return g;throw new Error(`Expected valid scalar < ${d}, got ${typeof g} ${g}`)}function F(g){return g===P?g:R(g,o)}let x=new Map;function U(g){if(!(g instanceof p))throw new Error("ExtendedPoint expected")}class p{constructor(d,w,B,L){if(this.ex=d,this.ey=w,this.ez=B,this.et=L,!_(d))throw new Error("x required");if(!_(w))throw new Error("y required");if(!_(B))throw new Error("z required");if(!_(L))throw new Error("t required")}get x(){return this.toAffine().x}get y(){return this.toAffine().y}static fromAffine(d){if(d instanceof p)throw new Error("extended point not allowed");let{x:w,y:B}=d||{};if(!_(w)||!_(B))throw new Error("invalid affine point");return new p(w,B,k,a(w*B))}static normalizeZ(d){let w=n.invertBatch(d.map(B=>B.ez));return d.map((B,L)=>B.toAffine(w[L])).map(p.fromAffine)}_setWindowSize(d){this._WINDOW_SIZE=d,x.delete(this)}assertValidity(){let{a:d,d:w}=e;if(this.is0())throw new Error("bad point: ZERO");let{ex:B,ey:L,ez:S,et:I}=this,N=a(B*B),H=a(L*L),C=a(S*S),M=a(C*C),V=a(N*d),Q=a(C*a(V+H)),$=a(M+a(w*a(N*H)));if(Q!==$)throw new Error("bad point: equation left != right (1)");let ot=a(B*L),tt=a(S*I);if(ot!==tt)throw new Error("bad point: equation left != right (2)")}equals(d){U(d);let{ex:w,ey:B,ez:L}=this,{ex:S,ey:I,ez:N}=d,H=a(w*N),C=a(S*L),M=a(B*N),V=a(I*L);return H===C&&M===V}is0(){return this.equals(p.ZERO)}negate(){return new p(a(-this.ex),this.ey,this.ez,a(-this.et))}double(){let{a:d}=e,{ex:w,ey:B,ez:L}=this,S=a(w*w),I=a(B*B),N=a(It*a(L*L)),H=a(d*S),C=w+B,M=a(a(C*C)-S-I),V=H+I,Q=V-N,$=H-I,ot=a(M*Q),tt=a(V*$),mt=a(M*$),Bt=a(Q*V);return new p(ot,tt,Bt,mt)}add(d){U(d);let{a:w,d:B}=e,{ex:L,ey:S,ez:I,et:N}=this,{ex:H,ey:C,ez:M,et:V}=d;if(w===BigInt(-1)){let ce=a((S-L)*(C+H)),fe=a((S+L)*(C-H)),Dt=a(fe-ce);if(Dt===P)return this.double();let ae=a(I*It*V),he=a(N*It*M),le=he+ae,de=fe+ce,ue=he-ae,tn=a(le*Dt),en=a(de*ue),nn=a(le*ue),on=a(Dt*de);return new p(tn,en,on,nn)}let Q=a(L*H),$=a(S*C),ot=a(N*B*V),tt=a(I*M),mt=a((L+S)*(H+C)-Q-$),Bt=tt-ot,se=tt+ot,ie=a($-w*Q),ze=a(mt*Bt),Ke=a(se*ie),Qe=a(mt*ie),Je=a(Bt*se);return new p(ze,Ke,Je,Qe)}subtract(d){return this.add(d.negate())}wNAF(d){return v.wNAFCached(this,x,d,p.normalizeZ)}multiply(d){let{p:w,f:B}=this.wNAF(R(d,o));return p.normalizeZ([w,B])[0]}multiplyUnsafe(d){let w=F(d);return w===P?K:this.equals(K)||w===k?this:this.equals(G)?this.wNAF(w).p:v.unsafeLadder(this,w)}isSmallOrder(){return this.multiplyUnsafe(i).is0()}isTorsionFree(){return v.unsafeLadder(this,o).is0()}toAffine(d){let{ex:w,ey:B,ez:L}=this,S=this.is0();d==null&&(d=S?Yn:n.inv(L));let I=a(w*d),N=a(B*d),H=a(L*d);if(S)return{x:P,y:k};if(H!==k)throw new Error("invZ was invalid");return{x:I,y:N}}clearCofactor(){let{h:d}=e;return d===k?this:this.multiplyUnsafe(d)}static fromHex(d,w=!1){let{d:B,a:L}=e,S=n.BYTES;d=J("pointHex",d,S);let I=d.slice(),N=d[S-1];I[S-1]=N&-129;let H=ut(I);H===P||(w?R(H,h):R(H,n.ORDER));let C=a(H*H),M=a(C-k),V=a(B*C-L),{isValid:Q,value:$}=l(M,V);if(!Q)throw new Error("Point.fromHex: invalid y coordinate");let ot=($&k)===k,tt=(N&128)!==0;if(!w&&$===P&&tt)throw new Error("Point.fromHex: x=0 and x_0=1");return tt!==ot&&($=a(-$)),p.fromAffine({x:$,y:H})}static fromPrivateKey(d){return j(d).point}toRawBytes(){let{x:d,y:w}=this.toAffine(),B=wt(w,n.BYTES);return B[B.length-1]|=d&k?128:0,B}toHex(){return Ht(this.toRawBytes())}}p.BASE=new p(e.Gx,e.Gy,k,a(e.Gx*e.Gy)),p.ZERO=new p(P,k,k,P);let{BASE:G,ZERO:K}=p,v=Te(p,f*8);function T(g){return D(g,o)}function Z(g){return T(ut(g))}function j(g){let d=f;g=J("private key",g,d);let w=J("hashed private key",s(g),2*d),B=u(w.slice(0,d)),L=w.slice(d,2*d),S=Z(B),I=G.multiply(S),N=I.toRawBytes();return{head:B,prefix:L,scalar:S,point:I,pointBytes:N}}function W(g){return j(g).pointBytes}function X(g=new Uint8Array,...d){let w=kt(...d);return Z(s(b(w,J("context",g),!!r)))}function pt(g,d,w={}){g=J("message",g),r&&(g=r(g));let{prefix:B,scalar:L,pointBytes:S}=j(d),I=X(w.context,B,g),N=G.multiply(I).toRawBytes(),H=X(w.context,N,S,g),C=T(I+H*L);F(C);let M=kt(N,wt(C,n.BYTES));return J("result",M,f*2)}let lt=Pn;function Pe(g,d,w,B=lt){let{context:L,zip215:S}=B,I=n.BYTES;g=J("signature",g,2*I),d=J("message",d),r&&(d=r(d));let N=ut(g.slice(I,2*I)),H,C,M;try{H=p.fromHex(w,S),C=p.fromHex(g.slice(0,I),S),M=G.multiplyUnsafe(N)}catch{return!1}if(!S&&H.isSmallOrder())return!1;let V=X(L,C.toRawBytes(),H.toRawBytes(),d);return C.add(H.multiplyUnsafe(V)).subtract(M).clearCofactor().equals(p.ZERO)}return G._setWindowSize(8),{CURVE:e,getPublicKey:W,sign:pt,verify:Pe,ExtendedPoint:p,utils:{getExtendedPublicKey:j,randomPrivateKey:()=>c(n.BYTES),precompute(g=8,d=p.BASE){return d._setWindowSize(g),d.multiply(BigInt(3)),d}}}}var Yt=BigInt("57896044618658097711785492504343953926634992332820282019728792003956564819949"),Oe=BigInt("19681161376707505956807079304988542015446066515923890162744021073123829784752"),gr=BigInt(0),Kn=BigInt(1),Xt=BigInt(2),Qn=BigInt(5),De=BigInt(10),Jn=BigInt(20),to=BigInt(40),Re=BigInt(80);function eo(t){let e=Yt,o=t*t%e*t%e,r=Y(o,Xt,e)*o%e,s=Y(r,Kn,e)*t%e,c=Y(s,Qn,e)*s%e,f=Y(c,De,e)*c%e,i=Y(f,Jn,e)*f%e,h=Y(i,to,e)*i%e,a=Y(h,Re,e)*h%e,l=Y(a,Re,e)*h%e,u=Y(l,De,e)*c%e;return{pow_p_5_8:Y(u,Xt,e)*t%e,b2:o}}function no(t){return t[0]&=248,t[31]&=127,t[31]|=64,t}function oo(t,e){let n=Yt,o=D(e*e*e,n),r=D(o*o*e,n),s=eo(t*r).pow_p_5_8,c=D(t*o*s,n),f=D(e*c*c,n),i=c,h=D(c*Oe,n),a=f===t,l=f===D(-t,n),u=f===D(-t*Oe,n);return a&&(c=i),(l||u)&&(c=h),Ie(c,n)&&(c=D(-c,n)),{isValid:a||l,value:c}}var nt=ve(Yt,void 0,!0),Pt={a:BigInt(-1),d:BigInt("37095705934669439343138083508754565189542113879843219016388785533085940283555"),Fp:nt,n:BigInt("7237005577332262213973186563042994240857116359379907606001950938285454250989"),h:BigInt(8),Gx:BigInt("15112221349535400772501151409588531511454012693041857206046113283949847762202"),Gy:BigInt("46316835694926478169428394003475163141307993866256225615783033603165251855960"),hash:Vt,randomBytes:we,adjustScalarBytes:no,uvRatio:oo},qe=Ut(Pt);function Fe(t,e,n){if(e.length>255)throw new Error("Context is too big");return pe(qt("SigEd25519 no Ed25519 collisions"),new Uint8Array([n?1:0,e.length]),e,t)}var wr=Ut({...Pt,domain:Fe}),yr=Ut({...Pt,domain:Fe,prehash:Vt});var ro=(nt.ORDER+BigInt(3))/BigInt(8),mr=nt.pow(Xt,ro),Br=nt.sqrt(nt.neg(nt.ONE)),Er=(nt.ORDER-BigInt(5))/BigInt(8),Ar=BigInt(486662);var _r=Ce(nt,nt.neg(BigInt(486664)));var Lr=BigInt("25063068953384623474111414158702152701244531502492656460079210482610430750235"),Sr=BigInt("54469307008909316920995813868745141605393597292927456921205312896311721017578"),Hr=BigInt("1159843021668779879193775521855586647937357759715417654439879720876111806838"),Ir=BigInt("40440834346308536858101042469323190826248399146238708352240133220865137265952");var Ur=BigInt("0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");function so(t){return t instanceof Uint8Array||t!=null&&typeof t=="object"&&t.constructor.name==="Uint8Array"}function zt(t,...e){if(!so(t))throw new Error("Uint8Array expected");if(e.length>0&&!e.includes(t.length))throw new Error(`Uint8Array expected of length ${e}, not of length=${t.length}`)}function Kt(t,e=!0){if(t.destroyed)throw new Error("Hash instance has been destroyed");if(e&&t.finished)throw new Error("Hash#digest() has already been called")}function Ge(t,e){zt(t);let n=e.outputLen;if(t.length<n)throw new Error(`digestInto() expects output buffer of length at least ${n}`)}var Ct=t=>new DataView(t.buffer,t.byteOffset,t.byteLength),z=(t,e)=>t<<32-e|t>>>e,yt=(t,e)=>t<<e|t>>>32-e>>>0,Nr=new Uint8Array(new Uint32Array([287454020]).buffer)[0]===68;function io(t){if(typeof t!="string")throw new Error(`utf8ToBytes expected string, got ${typeof t}`);return new Uint8Array(new TextEncoder().encode(t))}function Qt(t){return typeof t=="string"&&(t=io(t)),zt(t),t}var vt=class{clone(){return this._cloneInto()}},Or={}.toString;function bt(t){let e=o=>t().update(Qt(o)).digest(),n=t();return e.outputLen=n.outputLen,e.blockLen=n.blockLen,e.create=()=>t(),e}function co(t,e,n,o){if(typeof t.setBigUint64=="function")return t.setBigUint64(e,n,o);let r=BigInt(32),s=BigInt(4294967295),c=Number(n>>r&s),f=Number(n&s),i=o?4:0,h=o?0:4;t.setUint32(e+i,c,o),t.setUint32(e+h,f,o)}var Me=(t,e,n)=>t&e^~t&n,Ve=(t,e,n)=>t&e^t&n^e&n,it=class extends vt{constructor(e,n,o,r){super(),this.blockLen=e,this.outputLen=n,this.padOffset=o,this.isLE=r,this.finished=!1,this.length=0,this.pos=0,this.destroyed=!1,this.buffer=new Uint8Array(e),this.view=Ct(this.buffer)}update(e){Kt(this);let{view:n,buffer:o,blockLen:r}=this;e=Qt(e);let s=e.length;for(let c=0;c<s;){let f=Math.min(r-this.pos,s-c);if(f===r){let i=Ct(e);for(;r<=s-c;c+=r)this.process(i,c);continue}o.set(e.subarray(c,c+f),this.pos),this.pos+=f,c+=f,this.pos===r&&(this.process(n,0),this.pos=0)}return this.length+=e.length,this.roundClean(),this}digestInto(e){Kt(this),Ge(e,this),this.finished=!0;let{buffer:n,view:o,blockLen:r,isLE:s}=this,{pos:c}=this;n[c++]=128,this.buffer.subarray(c).fill(0),this.padOffset>r-c&&(this.process(o,0),c=0);for(let l=c;l<r;l++)n[l]=0;co(o,r-8,BigInt(this.length*8),s),this.process(o,0);let f=Ct(e),i=this.outputLen;if(i%4)throw new Error("_sha2: outputLen should be aligned to 32bit");let h=i/4,a=this.get();if(h>a.length)throw new Error("_sha2: outputLen bigger than state");for(let l=0;l<h;l++)f.setUint32(4*l,a[l],s)}digest(){let{buffer:e,outputLen:n}=this;this.digestInto(e);let o=e.slice(0,n);return this.destroy(),o}_cloneInto(e){e||(e=new this.constructor),e.set(...this.get());let{blockLen:n,buffer:o,length:r,finished:s,destroyed:c,pos:f}=this;return e.length=r,e.pos=f,e.finished=s,e.destroyed=c,r%n&&e.buffer.set(o),e}};var Tt=BigInt(4294967295),Jt=BigInt(32);function $e(t,e=!1){return e?{h:Number(t&Tt),l:Number(t>>Jt&Tt)}:{h:Number(t>>Jt&Tt)|0,l:Number(t&Tt)|0}}function fo(t,e=!1){let n=new Uint32Array(t.length),o=new Uint32Array(t.length);for(let r=0;r<t.length;r++){let{h:s,l:c}=$e(t[r],e);[n[r],o[r]]=[s,c]}return[n,o]}var ao=(t,e)=>BigInt(t>>>0)<<Jt|BigInt(e>>>0),ho=(t,e,n)=>t>>>n,lo=(t,e,n)=>t<<32-n|e>>>n,uo=(t,e,n)=>t>>>n|e<<32-n,xo=(t,e,n)=>t<<32-n|e>>>n,bo=(t,e,n)=>t<<64-n|e>>>n-32,po=(t,e,n)=>t>>>n-32|e<<64-n,go=(t,e)=>e,wo=(t,e)=>t,yo=(t,e,n)=>t<<n|e>>>32-n,mo=(t,e,n)=>e<<n|t>>>32-n,Bo=(t,e,n)=>e<<n-32|t>>>64-n,Eo=(t,e,n)=>t<<n-32|e>>>64-n;function Ao(t,e,n,o){let r=(e>>>0)+(o>>>0);return{h:t+n+(r/2**32|0)|0,l:r|0}}var _o=(t,e,n)=>(t>>>0)+(e>>>0)+(n>>>0),Lo=(t,e,n,o)=>e+n+o+(t/2**32|0)|0,So=(t,e,n,o)=>(t>>>0)+(e>>>0)+(n>>>0)+(o>>>0),Ho=(t,e,n,o,r)=>e+n+o+r+(t/2**32|0)|0,Io=(t,e,n,o,r)=>(t>>>0)+(e>>>0)+(n>>>0)+(o>>>0)+(r>>>0),Uo=(t,e,n,o,r,s)=>e+n+o+r+s+(t/2**32|0)|0;var vo={fromBig:$e,split:fo,toBig:ao,shrSH:ho,shrSL:lo,rotrSH:uo,rotrSL:xo,rotrBH:bo,rotrBL:po,rotr32H:go,rotr32L:wo,rotlSH:yo,rotlSL:mo,rotlBH:Bo,rotlBL:Eo,add:Ao,add3L:_o,add3H:Lo,add4L:So,add4H:Ho,add5H:Uo,add5L:Io},m=vo;var[Co,To]=m.split(["0x428a2f98d728ae22","0x7137449123ef65cd","0xb5c0fbcfec4d3b2f","0xe9b5dba58189dbbc","0x3956c25bf348b538","0x59f111f1b605d019","0x923f82a4af194f9b","0xab1c5ed5da6d8118","0xd807aa98a3030242","0x12835b0145706fbe","0x243185be4ee4b28c","0x550c7dc3d5ffb4e2","0x72be5d74f27b896f","0x80deb1fe3b1696b1","0x9bdc06a725c71235","0xc19bf174cf692694","0xe49b69c19ef14ad2","0xefbe4786384f25e3","0x0fc19dc68b8cd5b5","0x240ca1cc77ac9c65","0x2de92c6f592b0275","0x4a7484aa6ea6e483","0x5cb0a9dcbd41fbd4","0x76f988da831153b5","0x983e5152ee66dfab","0xa831c66d2db43210","0xb00327c898fb213f","0xbf597fc7beef0ee4","0xc6e00bf33da88fc2","0xd5a79147930aa725","0x06ca6351e003826f","0x142929670a0e6e70","0x27b70a8546d22ffc","0x2e1b21385c26c926","0x4d2c6dfc5ac42aed","0x53380d139d95b3df","0x650a73548baf63de","0x766a0abb3c77b2a8","0x81c2c92e47edaee6","0x92722c851482353b","0xa2bfe8a14cf10364","0xa81a664bbc423001","0xc24b8b70d0f89791","0xc76c51a30654be30","0xd192e819d6ef5218","0xd69906245565a910","0xf40e35855771202a","0x106aa07032bbd1b8","0x19a4c116b8d2d0c8","0x1e376c085141ab53","0x2748774cdf8eeb99","0x34b0bcb5e19b48a8","0x391c0cb3c5c95a63","0x4ed8aa4ae3418acb","0x5b9cca4f7763e373","0x682e6ff3d6b2b8a3","0x748f82ee5defb2fc","0x78a5636f43172f60","0x84c87814a1f0ab72","0x8cc702081a6439ec","0x90befffa23631e28","0xa4506cebde82bde9","0xbef9a3f7b2c67915","0xc67178f2e372532b","0xca273eceea26619c","0xd186b8c721c0c207","0xeada7dd6cde0eb1e","0xf57d4f7fee6ed178","0x06f067aa72176fba","0x0a637dc5a2c898a6","0x113f9804bef90dae","0x1b710b35131c471b","0x28db77f523047d84","0x32caab7b40c72493","0x3c9ebe0a15c9bebc","0x431d67c49c100d4c","0x4cc5d4becb3e42b6","0x597f299cfc657e2a","0x5fcb6fab3ad6faec","0x6c44198c4a475817"].map(t=>BigInt(t))),ct=new Uint32Array(80),ft=new Uint32Array(80),te=class extends it{constructor(){super(128,64,16,!1),this.Ah=1779033703,this.Al=-205731576,this.Bh=-1150833019,this.Bl=-2067093701,this.Ch=1013904242,this.Cl=-23791573,this.Dh=-1521486534,this.Dl=1595750129,this.Eh=1359893119,this.El=-1377402159,this.Fh=-1694144372,this.Fl=725511199,this.Gh=528734635,this.Gl=-79577749,this.Hh=1541459225,this.Hl=327033209}get(){let{Ah:e,Al:n,Bh:o,Bl:r,Ch:s,Cl:c,Dh:f,Dl:i,Eh:h,El:a,Fh:l,Fl:u,Gh:b,Gl:E,Hh:A,Hl:_}=this;return[e,n,o,r,s,c,f,i,h,a,l,u,b,E,A,_]}set(e,n,o,r,s,c,f,i,h,a,l,u,b,E,A,_){this.Ah=e|0,this.Al=n|0,this.Bh=o|0,this.Bl=r|0,this.Ch=s|0,this.Cl=c|0,this.Dh=f|0,this.Dl=i|0,this.Eh=h|0,this.El=a|0,this.Fh=l|0,this.Fl=u|0,this.Gh=b|0,this.Gl=E|0,this.Hh=A|0,this.Hl=_|0}process(e,n){for(let x=0;x<16;x++,n+=4)ct[x]=e.getUint32(n),ft[x]=e.getUint32(n+=4);for(let x=16;x<80;x++){let U=ct[x-15]|0,p=ft[x-15]|0,G=m.rotrSH(U,p,1)^m.rotrSH(U,p,8)^m.shrSH(U,p,7),K=m.rotrSL(U,p,1)^m.rotrSL(U,p,8)^m.shrSL(U,p,7),v=ct[x-2]|0,T=ft[x-2]|0,Z=m.rotrSH(v,T,19)^m.rotrBH(v,T,61)^m.shrSH(v,T,6),j=m.rotrSL(v,T,19)^m.rotrBL(v,T,61)^m.shrSL(v,T,6),W=m.add4L(K,j,ft[x-7],ft[x-16]),X=m.add4H(W,G,Z,ct[x-7],ct[x-16]);ct[x]=X|0,ft[x]=W|0}let{Ah:o,Al:r,Bh:s,Bl:c,Ch:f,Cl:i,Dh:h,Dl:a,Eh:l,El:u,Fh:b,Fl:E,Gh:A,Gl:_,Hh:R,Hl:F}=this;for(let x=0;x<80;x++){let U=m.rotrSH(l,u,14)^m.rotrSH(l,u,18)^m.rotrBH(l,u,41),p=m.rotrSL(l,u,14)^m.rotrSL(l,u,18)^m.rotrBL(l,u,41),G=l&b^~l&A,K=u&E^~u&_,v=m.add5L(F,p,K,To[x],ft[x]),T=m.add5H(v,R,U,G,Co[x],ct[x]),Z=v|0,j=m.rotrSH(o,r,28)^m.rotrBH(o,r,34)^m.rotrBH(o,r,39),W=m.rotrSL(o,r,28)^m.rotrBL(o,r,34)^m.rotrBL(o,r,39),X=o&s^o&f^s&f,pt=r&c^r&i^c&i;R=A|0,F=_|0,A=b|0,_=E|0,b=l|0,E=u|0,{h:l,l:u}=m.add(h|0,a|0,T|0,Z|0),h=f|0,a=i|0,f=s|0,i=c|0,s=o|0,c=r|0;let lt=m.add3L(Z,W,pt);o=m.add3H(lt,T,j,X),r=lt|0}({h:o,l:r}=m.add(this.Ah|0,this.Al|0,o|0,r|0)),{h:s,l:c}=m.add(this.Bh|0,this.Bl|0,s|0,c|0),{h:f,l:i}=m.add(this.Ch|0,this.Cl|0,f|0,i|0),{h,l:a}=m.add(this.Dh|0,this.Dl|0,h|0,a|0),{h:l,l:u}=m.add(this.Eh|0,this.El|0,l|0,u|0),{h:b,l:E}=m.add(this.Fh|0,this.Fl|0,b|0,E|0),{h:A,l:_}=m.add(this.Gh|0,this.Gl|0,A|0,_|0),{h:R,l:F}=m.add(this.Hh|0,this.Hl|0,R|0,F|0),this.set(o,r,s,c,f,i,h,a,l,u,b,E,A,_,R,F)}roundClean(){ct.fill(0),ft.fill(0)}destroy(){this.buffer.fill(0),this.set(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)}};var ke=bt(()=>new te);var No=new Uint32Array([1116352408,1899447441,3049323471,3921009573,961987163,1508970993,2453635748,2870763221,3624381080,310598401,607225278,1426881987,1925078388,2162078206,2614888103,3248222580,3835390401,4022224774,264347078,604807628,770255983,1249150122,1555081692,1996064986,2554220882,2821834349,2952996808,3210313671,3336571891,3584528711,113926993,338241895,666307205,773529912,1294757372,1396182291,1695183700,1986661051,2177026350,2456956037,2730485921,2820302411,3259730800,3345764771,3516065817,3600352804,4094571909,275423344,430227734,506948616,659060556,883997877,958139571,1322822218,1537002063,1747873779,1955562222,2024104815,2227730452,2361852424,2428436474,2756734187,3204031479,3329325298]),at=new Uint32Array([1779033703,3144134277,1013904242,2773480762,1359893119,2600822924,528734635,1541459225]),ht=new Uint32Array(64),ee=class extends it{constructor(){super(64,32,8,!1),this.A=at[0]|0,this.B=at[1]|0,this.C=at[2]|0,this.D=at[3]|0,this.E=at[4]|0,this.F=at[5]|0,this.G=at[6]|0,this.H=at[7]|0}get(){let{A:e,B:n,C:o,D:r,E:s,F:c,G:f,H:i}=this;return[e,n,o,r,s,c,f,i]}set(e,n,o,r,s,c,f,i){this.A=e|0,this.B=n|0,this.C=o|0,this.D=r|0,this.E=s|0,this.F=c|0,this.G=f|0,this.H=i|0}process(e,n){for(let l=0;l<16;l++,n+=4)ht[l]=e.getUint32(n,!1);for(let l=16;l<64;l++){let u=ht[l-15],b=ht[l-2],E=z(u,7)^z(u,18)^u>>>3,A=z(b,17)^z(b,19)^b>>>10;ht[l]=A+ht[l-7]+E+ht[l-16]|0}let{A:o,B:r,C:s,D:c,E:f,F:i,G:h,H:a}=this;for(let l=0;l<64;l++){let u=z(f,6)^z(f,11)^z(f,25),b=a+u+Me(f,i,h)+No[l]+ht[l]|0,A=(z(o,2)^z(o,13)^z(o,22))+Ve(o,r,s)|0;a=h,h=i,i=f,f=c+b|0,c=s,s=r,r=o,o=b+A|0}o=o+this.A|0,r=r+this.B|0,s=s+this.C|0,c=c+this.D|0,f=f+this.E|0,i=i+this.F|0,h=h+this.G|0,a=a+this.H|0,this.set(o,r,s,c,f,i,h,a)}roundClean(){ht.fill(0)}destroy(){this.set(0,0,0,0,0,0,0,0),this.buffer.fill(0)}};var Nt=bt(()=>new ee);var Oo=new Uint8Array([7,4,13,1,10,6,15,3,12,0,9,5,2,14,11,8]),je=new Uint8Array(new Array(16).fill(0).map((t,e)=>e)),Do=je.map(t=>(9*t+5)%16),oe=[je],re=[Do];for(let t=0;t<4;t++)for(let e of[oe,re])e.push(e[t].map(n=>Oo[n]));var We=[[11,14,15,12,5,8,7,9,11,13,14,15,6,7,9,8],[12,13,11,15,6,9,9,7,12,15,11,13,7,8,7,7],[13,15,14,11,7,7,6,8,13,14,13,12,5,5,6,9],[14,11,12,14,8,6,5,5,15,12,15,14,9,9,8,6],[15,12,13,13,9,5,8,6,14,11,12,11,8,6,5,5]].map(t=>new Uint8Array(t)),Ro=oe.map((t,e)=>t.map(n=>We[e][n])),qo=re.map((t,e)=>t.map(n=>We[e][n])),Fo=new Uint32Array([0,1518500249,1859775393,2400959708,2840853838]),Go=new Uint32Array([1352829926,1548603684,1836072691,2053994217,0]);function Ze(t,e,n,o){return t===0?e^n^o:t===1?e&n|~e&o:t===2?(e|~n)^o:t===3?e&o|n&~o:e^(n|~o)}var Ot=new Uint32Array(16),ne=class extends it{constructor(){super(64,20,8,!0),this.h0=1732584193,this.h1=-271733879,this.h2=-1732584194,this.h3=271733878,this.h4=-1009589776}get(){let{h0:e,h1:n,h2:o,h3:r,h4:s}=this;return[e,n,o,r,s]}set(e,n,o,r,s){this.h0=e|0,this.h1=n|0,this.h2=o|0,this.h3=r|0,this.h4=s|0}process(e,n){for(let b=0;b<16;b++,n+=4)Ot[b]=e.getUint32(n,!0);let o=this.h0|0,r=o,s=this.h1|0,c=s,f=this.h2|0,i=f,h=this.h3|0,a=h,l=this.h4|0,u=l;for(let b=0;b<5;b++){let E=4-b,A=Fo[b],_=Go[b],R=oe[b],F=re[b],x=Ro[b],U=qo[b];for(let p=0;p<16;p++){let G=yt(o+Ze(b,s,f,h)+Ot[R[p]]+A,x[p])+l|0;o=l,l=h,h=yt(f,10)|0,f=s,s=G}for(let p=0;p<16;p++){let G=yt(r+Ze(E,c,i,a)+Ot[F[p]]+_,U[p])+u|0;r=u,u=a,a=yt(i,10)|0,i=c,c=G}}this.set(this.h1+f+a|0,this.h2+h+u|0,this.h3+l+r|0,this.h4+o+c|0,this.h0+s+i|0)}roundClean(){Ot.fill(0)}destroy(){this.destroyed=!0,this.buffer.fill(0),this.set(0,0,0,0,0)}},Xe=bt(()=>new ne);var Mo="rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz";function Vo(t){let e=[0];for(let n of t){let o=n;for(let r=0;r<e.length;r++)o+=e[r]<<8,e[r]=o%58,o=Math.floor(o/58);for(;o>0;)e.push(o%58),o=Math.floor(o/58)}for(let n=0;n<t.length&&t[n]===0;n++)e.push(0);return e.reverse().map(n=>Mo[n]).join("")}function Ye(t,e){let n=new Uint8Array([...t,...e]),o=Nt(Nt(n)).slice(0,4);return Vo(new Uint8Array([...n,...o]))}function $o(t){let e=t.join(" "),n=new Uint8Array(Array.from(e).slice(0,16).map(h=>Number(h))),o=ke(n).slice(0,32),r=qe.getPublicKey(o),s=new Uint8Array([237,...r]),c=Xe(Nt(s)),f=Ye([0],c),i=Ye([1,225,75],n);return{address:f,seed:i}}window.deriveXRPHWallet=$o;})();
+/*! Bundled license information:
+
+@noble/hashes/esm/utils.js:
+@noble/hashes/esm/utils.js:
+  (*! noble-hashes - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
+
+@noble/curves/esm/abstract/utils.js:
+@noble/curves/esm/abstract/modular.js:
+@noble/curves/esm/abstract/curve.js:
+@noble/curves/esm/abstract/edwards.js:
+@noble/curves/esm/ed25519.js:
+  (*! noble-curves - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
+*/
+
+</script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Courier New', monospace;
+  background: #f0f2f5;
+  color: #1a1a2e;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 16px;
+}
+
+.banner {
+  width: 100%;
+  max-width: 560px;
+  padding: 10px 16px;
+  border-radius: 4px;
+  font-size: 13px;
+  text-align: center;
+  margin-bottom: 12px;
+  letter-spacing: 0.04em;
+}
+.banner.online  { background: #fff0f0; border: 1px solid #ff4400; color: #cc2200; }
+.banner.offline { background: #f0fff4; border: 1px solid #22aa44; color: #115522; }
+
+.card {
+  width: 100%;
+  max-width: 560px;
+  background: #fff;
+  border: 1px solid #d0d4e0;
+  border-radius: 6px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+h1 { font-size: 20px; font-weight: 400; letter-spacing: 0.06em; margin-bottom: 6px; }
+.subtitle { font-size: 13px; color: #555; line-height: 1.6; margin-bottom: 0; }
+
+.warning {
+  background: #fff3ee;
+  border: 1px solid #ff4400;
+  border-radius: 4px;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #cc3300;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+.warning strong { display: block; margin-bottom: 4px; }
+
+.section-label {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: #3355aa;
+  text-transform: uppercase;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.field label {
+  display: block;
+  font-size: 12px;
+  font-weight: bold;
+  color: #333355;
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+
+.field input {
+  width: 100%;
+  background: #f8f9fc;
+  border: 1px solid #c0c8e0;
+  border-radius: 3px;
+  color: #1a1a2e;
+  font-family: 'Courier New', monospace;
+  font-size: 17px;
+  letter-spacing: 0.1em;
+  padding: 9px 6px;
+  text-align: center;
+}
+.field input:focus { outline: none; border-color: #3355ff; }
+.field input.ok  { border-color: #22aa44; }
+.field input.bad { border-color: #cc3322; }
+
+.hint { font-size: 12px; color: #888; margin-bottom: 16px; line-height: 1.5; }
+
+button.primary {
+  width: 100%;
+  padding: 13px;
+  background: #2244cc;
+  border: 1px solid #1133bb;
+  border-radius: 4px;
+  color: #fff;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  letter-spacing: 0.07em;
+  cursor: pointer;
+}
+button.primary:hover { background: #1133bb; }
+button.primary:disabled { background: #ccd; border-color: #bbc; color: #889; cursor: not-allowed; }
+
+/* overlay when online */
+.input-wrap { position: relative; width: 100%; max-width: 560px; }
+.overlay {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: rgba(255,240,235,0.7);
+  border-radius: 6px;
+  z-index: 10;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+}
+.overlay.show { display: flex; }
+.overlay-box {
+  background: #fff3ee;
+  border: 2px solid #ff4400;
+  border-radius: 6px;
+  padding: 20px 28px;
+  text-align: center;
+  font-family: 'Courier New', monospace;
+}
+.overlay-box h3 { color: #cc2200; font-size: 14px; margin-bottom: 8px; }
+.overlay-box p  { color: #552200; font-size: 12px; line-height: 1.6; }
+
+/* result */
+.result {
+  display: none;
+  width: 100%;
+  max-width: 560px;
+  background: #f0fff4;
+  border: 1px solid #22aa44;
+  border-radius: 6px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+.result.show { display: block; }
+.result-label { font-size: 11px; color: #117733; letter-spacing: 0.08em; margin-bottom: 6px; }
+.result-value {
+  background: #e8f8ee;
+  border: 1px solid #22aa44;
+  border-radius: 3px;
+  padding: 10px 12px;
+  font-size: 13px;
+  word-break: break-all;
+  color: #115522;
+  margin-bottom: 8px;
+}
+button.copy {
+  width: 100%;
+  padding: 8px;
+  background: #d4eedd;
+  border: 1px solid #22aa44;
+  border-radius: 3px;
+  color: #117733;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  cursor: pointer;
+  margin-bottom: 16px;
+  letter-spacing: 0.06em;
+}
+button.copy:hover { background: #c0e8cc; }
+
+.verify-label { font-size: 11px; color: #117733; letter-spacing: 0.08em; margin-bottom: 6px; margin-top: 8px; }
+.verify-input {
+  width: 100%;
+  background: #f8fff9;
+  border: 1px solid #22aa44;
+  border-radius: 3px;
+  color: #115522;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  padding: 9px 12px;
+  margin-bottom: 6px;
+}
+.verify-input:focus { outline: none; border-color: #117733; }
+.match    { font-size: 12px; padding: 7px 12px; border-radius: 3px; background: #f0fff4; border: 1px solid #22aa44; color: #117733; }
+.no-match { font-size: 12px; padding: 7px 12px; border-radius: 3px; background: #fff0f0; border: 1px solid #cc3322; color: #882211; }
+
+.seed-wrap { position: relative; }
+.seed-blur { filter: blur(5px); user-select: none; cursor: pointer; }
+
+/* next steps */
+.steps-card { width: 100%; max-width: 560px; }
+.step { display: flex; gap: 14px; padding: 12px 0; border-bottom: 1px solid #eee; }
+.step:last-child { border-bottom: none; }
+.step-n { font-size: 13px; font-weight: bold; color: #2244cc; min-width: 20px; padding-top: 1px; }
+.step-t { font-size: 13px; color: #222; line-height: 1.7; }
+.step-t strong { color: #111; }
+.step-t a { color: #2244cc; }
+
+.error {
+  display: none;
+  width: 100%;
+  max-width: 560px;
+  background: #fff0f0;
+  border: 1px solid #cc3322;
+  border-radius: 6px;
+  padding: 14px 20px;
+  font-size: 13px;
+  color: #882211;
+  margin-bottom: 16px;
+}
+.error.show { display: block; }
+
+button.shred {
+  width: 100%;
+  max-width: 560px;
+  padding: 11px;
+  background: #cc3322;
+  border: 1px solid #aa2211;
+  border-radius: 4px;
+  color: #fff;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  letter-spacing: 0.07em;
+  cursor: pointer;
+  margin-top: 8px;
+}
+button.shred:hover { background: #aa2211; }
+
+footer {
+  width: 100%;
+  max-width: 560px;
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid #d0d4e0;
+  font-size: 11px;
+  color: #999;
+  text-align: center;
+  line-height: 1.7;
+}
+
+@media (max-width: 440px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+  body { padding: 16px 12px; }
+}
+</style>
+</head>
+<body>
+
+<div class="banner online" id="banner">
+  ● ONLINE — disconnect from internet to unlock
+</div>
+
+<div class="card" style="background:#1a1a2e;border-color:#2244cc;margin-bottom:12px;">
+  <div class="section-label" style="color:#8899dd;margin-bottom:12px;">BEFORE YOU START — SAVE THIS FILE</div>
+  <div style="font-size:13px;color:#c8cce8;line-height:1.8;">
+    <div style="margin-bottom:8px;">This tool works offline. You must save it to your device first.</div>
+    <div style="margin-bottom:6px;color:#aabbff;font-weight:bold;">📱 iPhone / iPad</div>
+    <div style="margin-bottom:12px;">Tap the share icon → <strong style="color:#fff">Save to Files</strong> → choose a location → Save.</div>
+    <div style="margin-bottom:6px;color:#aabbff;font-weight:bold;">🤖 Android</div>
+    <div style="margin-bottom:12px;">Tap the menu → <strong style="color:#fff">Download</strong> or <strong style="color:#fff">Save file</strong>. Then open from your Downloads app.</div>
+    <div style="margin-bottom:6px;color:#aabbff;font-weight:bold;">💻 Computer (Mac / Windows / Linux)</div>
+    <div>Press <strong style="color:#fff">Ctrl+S</strong> (or Cmd+S on Mac) to save the page. Open the saved file in your browser when ready.</div>
+  </div>
+</div>
+
+<div class="card">
+  <h1>XRPH Wallet Recovery</h1>
+  <p class="subtitle">Enter your 8 padlock numbers to recover your family seed, then import it into any XRPL wallet to move your funds.</p>
+</div>
+
+<div class="warning">
+  <strong>⚠ Turn off all network connections before entering your numbers</strong>
+  Turn off WiFi and mobile data. On a computer also unplug any ethernet cable. Do not rely on Airplane Mode alone — on some devices WiFi can remain on. The input fields unlock automatically once no network is detected. Nothing is sent anywhere — this runs entirely in your browser.
+</div>
+
+<div class="input-wrap">
+  <div class="overlay show" id="overlay">
+    <div class="overlay-box">
+      <h3>⚠ Turn off all networks first</h3>
+      <p>Turn off WiFi and mobile data separately.<br>On a computer, unplug ethernet too.<br>Do not rely on Airplane Mode alone.<br>Fields unlock automatically once offline.</p>
+    </div>
+  </div>
+  <div class="card" id="inputCard">
+    <div class="section-label">Enter your padlock numbers</div>
+    <div class="grid">
+      <div class="field"><label>A</label><input type="number" id="A" placeholder="000000" oninput="validate(this)" onpaste="handlePaste(event)"></div>
+      <div class="field"><label>B</label><input type="number" id="B" placeholder="000000" oninput="validate(this)"></div>
+      <div class="field"><label>C</label><input type="number" id="C" placeholder="000000" oninput="validate(this)"></div>
+      <div class="field"><label>D</label><input type="number" id="D" placeholder="000000" oninput="validate(this)"></div>
+      <div class="field"><label>E</label><input type="number" id="E" placeholder="000000" oninput="validate(this)"></div>
+      <div class="field"><label>F</label><input type="number" id="F" placeholder="000000" oninput="validate(this)"></div>
+      <div class="field"><label>G</label><input type="number" id="G" placeholder="000000" oninput="validate(this)"></div>
+      <div class="field"><label>H</label><input type="number" id="H" placeholder="000000" oninput="validate(this)"></div>
+    </div>
+    <p class="hint">8 groups of 6 digits from your XRPH app</p>
+    <button class="primary" id="deriveBtn" onclick="derive()" disabled>Recover seed</button>
+  </div>
+</div>
+
+<div class="error" id="errorCard"></div>
+
+<div class="result" id="resultCard">
+  <div class="section-label" style="margin-bottom:12px">Your wallet</div>
+
+  <div class="result-label">ADDRESS</div>
+  <div class="result-value" id="addrVal"></div>
+  <button class="copy" onclick="copyText('addrVal', this)">Copy address</button>
+
+  <div class="verify-label">Paste your known address to confirm it matches</div>
+  <input class="verify-input" id="verifyIn" placeholder="rXXXXXX..." oninput="verifyAddr()">
+  <div id="matchOut" style="display:none;margin-bottom:12px"></div>
+
+  <div class="result-label" style="margin-top:8px">FAMILY SEED</div>
+  <div class="seed-wrap">
+    <div class="result-value seed-blur" id="seedVal" onclick="revealSeed(this)"></div>
+  </div>
+  <button class="copy" id="seedCopyBtn" onclick="copyText('seedVal', this)" style="margin-top:6px">Tap seed to reveal, then copy</button>
+</div>
+
+<div class="card steps-card" id="nextSteps" style="display:none">
+  <div class="section-label">What to do next</div>
+  <div class="step">
+    <div class="step-n">1</div>
+    <div class="step-t"><strong>Import your seed into a wallet app.</strong> Use the family seed above (starts with sEdS…) to import this wallet. Most XRPL wallet apps support family seed import — follow your app's own instructions:<br><br>
+    · <a href="https://help.xaman.app/app/importing-accounts/import-account-types-explained" target="_blank">Xaman import guide →</a><br>
+    · <a href="https://crossmark.io/help" target="_blank">Crossmark import guide →</a><br>
+    · <a href="https://docs.gem.app" target="_blank">Gem Wallet import guide →</a>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-n">2</div>
+    <div class="step-t"><strong>Move all assets to a secure wallet.</strong> Send your XRP, XRPH, XRPHAI and any other tokens to a wallet you created fresh with secure software — not an exchange account. You need a wallet where you hold the keys.</div>
+  </div>
+  <div class="step">
+    <div class="step-n">3</div>
+    <div class="step-t"><strong>Delete the compromised account.</strong> Once everything is moved, use your wallet app's account delete function to close the old XRPH wallet. This removes it from the ledger and returns the XRP reserve to you.</div>
+  </div>
+</div>
+
+<button class="shred" id="shredBtn" style="display:none" onclick="shred()">⚑ Shred this page</button>
+
+<footer>
+  Runs entirely offline · @noble/curves + @noble/hashes (MIT) · No data transmitted · Prepared by onledger — September 2026
+</footer>
+
+<script>
+const IDS = ['A','B','C','D','E','F','G','H'];
+
+function validate(el) {
+  const v = el.value.replace(/\D/g,'').substring(0,6);
+  el.value = v;
+  el.classList.toggle('ok',  v.length === 6);
+  el.classList.toggle('bad', v.length > 0 && v.length < 6);
+  checkReady();
+}
+
+function checkReady() {
+  const ok = IDS.every(id => /^\d{6}$/.test(document.getElementById(id).value));
+  document.getElementById('deriveBtn').disabled = !ok;
+}
+
+function handlePaste(e) {
+  const nums = ((e.clipboardData||window.clipboardData).getData('text')).match(/\d{6}/g);
+  if (nums && nums.length >= 8) {
+    e.preventDefault();
+    IDS.forEach((id,i) => { const el=document.getElementById(id); el.value=nums[i]; el.classList.add('ok'); });
+    checkReady();
+  }
+}
+
+function derive() {
+  const vals = IDS.map(id => document.getElementById(id).value.trim());
+  for (let i=0;i<vals.length;i++) if (!/^\d{6}$/.test(vals[i])) { showError(`${IDS[i]} must be 6 digits`); return; }
+  try {
+    const r = window.deriveXRPHWallet(vals);
+    document.getElementById('addrVal').textContent = r.address;
+    document.getElementById('seedVal').textContent = r.seed;
+    document.getElementById('seedVal').classList.add('seed-blur');
+    document.getElementById('seedCopyBtn').textContent = 'Tap seed to reveal, then copy';
+    document.getElementById('verifyIn').value = '';
+    document.getElementById('matchOut').style.display = 'none';
+    document.getElementById('errorCard').classList.remove('show');
+    document.getElementById('resultCard').classList.add('show');
+    document.getElementById('nextSteps').style.display = 'block';
+    document.getElementById('shredBtn').style.display = 'block';
+    document.getElementById('resultCard').scrollIntoView({behavior:'smooth'});
+  } catch(e) { showError('Could not derive wallet: ' + e.message); }
+}
+
+function revealSeed(el) {
+  el.classList.remove('seed-blur');
+  el.style.userSelect = 'text';
+  document.getElementById('seedCopyBtn').textContent = 'Copy seed';
+}
+
+function verifyAddr() {
+  const input = document.getElementById('verifyIn').value.trim();
+  const derived = document.getElementById('addrVal').textContent;
+  const out = document.getElementById('matchOut');
+  if (!input) { out.style.display='none'; return; }
+  out.style.display = 'block';
+  out.className = input===derived ? 'match' : 'no-match';
+  out.textContent = input===derived ? '✓ Address matches — correct padlock' : '✗ Does not match — check your numbers';
+}
+
+function copyText(id, btn) {
+  const text = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent; btn.textContent='Copied ✓';
+    setTimeout(()=>btn.textContent=orig, 1500);
+  });
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorCard');
+  el.textContent = '⚠ ' + msg;
+  el.classList.add('show');
+}
+
+function shred() {
+  IDS.forEach(id => { const el=document.getElementById(id); el.value=''; el.className=''; });
+  document.getElementById('addrVal').textContent = '';
+  document.getElementById('seedVal').textContent = '';
+  document.getElementById('verifyIn').value = '';
+  document.getElementById('resultCard').classList.remove('show');
+  document.getElementById('nextSteps').style.display = 'none';
+  document.getElementById('shredBtn').style.display = 'none';
+  document.getElementById('errorCard').classList.remove('show');
+  try { localStorage.clear(); sessionStorage.clear(); } catch(e){}
+  if (window.caches) caches.keys().then(ks=>ks.forEach(k=>caches.delete(k)));
+  document.body.innerHTML = `<div style="font-family:'Courier New',monospace;max-width:500px;margin:80px auto;padding:32px;text-align:center;border:1px solid #22aa44;border-radius:6px;background:#f0fff4;">
+    <div style="font-size:28px;margin-bottom:12px">✓</div>
+    <div style="font-size:15px;color:#115522;font-weight:bold;margin-bottom:10px">Page wiped</div>
+    <div style="font-size:13px;color:#336644;line-height:1.7">All values cleared from memory.<br>Delete this HTML file from your Downloads folder.<br><br>You can close this tab.</div>
+  </div>`;
+}
+
+function isConnected() {
+  if (navigator.onLine) return true;
+  // Also check Network Information API for any active connection type
+  const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if (conn && conn.type && conn.type !== 'none') return true;
+  return false;
+}
+
+function getConnectionDetail() {
+  const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if (!navigator.onLine && (!conn || conn.type === 'none' || conn.effectiveType === undefined)) return null;
+  if (conn && conn.type && conn.type !== 'none') return conn.type; // wifi, cellular, ethernet etc
+  if (navigator.onLine) return 'internet';
+  return null;
+}
+
+function updateStatus() {
+  const connected = isConnected();
+  const detail = getConnectionDetail();
+  const banner = document.getElementById('banner');
+  const overlay = document.getElementById('overlay');
+
+  if (connected) {
+    banner.className = 'banner online';
+    const label = detail && detail !== 'internet' ? detail.toUpperCase() : 'NETWORK';
+    banner.textContent = `● ${label} CONNECTED — turn off WiFi and mobile data to unlock (computer: also unplug ethernet)`;
+    overlay.classList.add('show');
+    document.getElementById('deriveBtn').disabled = true;
+    document.getElementById('resultCard').classList.remove('show');
+    document.getElementById('nextSteps').style.display = 'none';
+    document.getElementById('shredBtn').style.display = 'none';
+    document.getElementById('addrVal').textContent = '';
+    document.getElementById('seedVal').textContent = '';
+    IDS.forEach(id => { const el=document.getElementById(id); el.value=''; el.className=''; });
+  } else {
+    banner.className = 'banner offline';
+    banner.textContent = '✓ OFFLINE — no network detected, safe to enter your numbers';
+    overlay.classList.remove('show');
+    checkReady();
+  }
+}
+
+window.addEventListener('load', updateStatus);
+window.addEventListener('online', updateStatus);
+window.addEventListener('offline', updateStatus);
+// Network Information API — fires when connection type changes (e.g. wifi joins)
+const _conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+if (_conn) _conn.addEventListener('change', updateStatus);
+</script>
+</body>
+</html>
