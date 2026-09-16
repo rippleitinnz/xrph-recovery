@@ -41,7 +41,7 @@ Do not simply move your funds and leave the old account open. As long as the acc
 
 ## How to use this tool
 
-1. Download `index.html` from the [latest release](../../releases/latest)
+1. Download `index.html` from the [latest release](../../releases/latest) Only download it from this github and from no where else.
 2. **Save it to your device** - do not open it directly from a chat app or email
 3. This app will not function until isolated from any network. Turn off WiFi and mobile data separately. On a computer also unplug any ethernet cable. Do not rely on Airplane Mode alone as WiFi can remain active on some devices
 4. Open the saved file in your browser
